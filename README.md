@@ -27,3 +27,7 @@
 | Сервер | Node.js, Express, TypeScript, Zod, Prisma |
 | БД | PostgreSQL |
 | ИИ | GigaChat API (потоковые ответы в чате) |
+
+## Лицензия
+
+Проект распространяется под лицензией [MIT](./LICENSE).
