@@ -1,0 +1,40 @@
+@startuml seq-dashboard
+title Рисунок 8 - Просмотр дашборда и совет дня
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 12
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #C4A000
+}
+
+actor "Пользователь" as User
+participant "Клиент (React PWA)" as Client
+participant "Сервер (Express API)" as Server
+database "PostgreSQL" as DB
+
+note over User, DB #FFFACD
+  Предусловие: авторизация и завершенный онбординг
+end note
+
+User -> Client : открыть главный экран
+
+Client -> Server : GET /api/progress/dashboard
+activate Server
+Server -> DB : profile, progress_logs, achievements
+DB --> Server : данные
+Server -> Server : расчет показателей
+Server --> Client : 200 DashboardData
+deactivate Server
+
+Client -> Server : GET /api/tips/daily
+activate Server
+Server -> Server : выбор совета по дню без курения
+Server --> Client : 200 tip + dayNumber
+deactivate Server
+
+Client --> User : статистика, совет дня, быстрые действия
+
+@enduml

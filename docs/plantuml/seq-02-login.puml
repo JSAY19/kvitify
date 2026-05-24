@@ -1,0 +1,52 @@
+@startuml seq-login
+title Рисунок 6 - Вход в аккаунт
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 12
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #C4A000
+}
+
+actor "Пользователь (гость)" as User
+participant "Клиент (React PWA)" as Client
+participant "Сервер (Express API)" as Server
+database "PostgreSQL" as DB
+
+note over User, DB #FFFACD
+  Прецедент: Вход в аккаунт
+  Предусловие: гость, страница входа
+end note
+
+User -> Client : email и пароль
+Client -> Server : POST /api/auth/login
+activate Server
+
+Server -> Server : валидация Zod
+Server -> DB : SELECT user + profile
+DB --> Server : user или пусто
+
+alt неверный email или пароль
+  Server --> Client : 401 Unauthorized
+  Client --> User : сообщение об ошибке
+else успешный вход
+  Server -> Server : bcrypt + JWT
+  Server --> Client : 200 + accessToken + Set-Cookie
+  Client -> Client : сохранить токен и user
+
+  alt profile не заполнен
+    Client --> User : переход /onboarding
+  else profile есть
+    Client --> User : переход на дашборд
+  end
+end
+
+deactivate Server
+
+note over User, DB #FFFACD
+  Постусловие: пользователь авторизован
+end note
+
+@enduml

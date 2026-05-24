@@ -1,0 +1,97 @@
+@startuml kvitifai-use-cases
+title Диаграмма прецедентов — PWA «КвитиФай»
+
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam Padding 24
+skinparam nodesep 20
+skinparam ranksep 24
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+skinparam actor {
+  BackgroundColor #DBEAFE
+  BorderColor #2563EB
+}
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+}
+skinparam rectangle {
+  BorderColor #334155
+  BackgroundColor #FAFAFA
+}
+
+left to right direction
+
+actor "Гость" as Guest
+actor "Пользователь" as User
+Guest -[hidden]down- User
+
+rectangle "«КвитиФай»" {
+
+  together {
+    (Регистрация) as UC_REG
+    (Вход в аккаунт) as UC_LOGIN
+    (Онбординг) as UC_ONB
+    (Профиль и push) as UC_PROF
+  }
+
+  together {
+    (Просмотр дашборда) as UC_DASH
+    (Совет дня) as UC_TIP
+    (Ежедневная отметка) as UC_CHK
+    (Поддержка при тяге) as UC_CRAV
+    (Дыхательные упражнения) as UC_BR
+    (Чат с ИИ) as UC_AI
+  }
+
+  together {
+    (Учёт прогресса) as UC_PROG
+    (Аналитика) as UC_STAT
+    (Дневник) as UC_JOUR
+    (Достижения) as UC_ACH
+    (Сообщество) as UC_COMM
+  }
+
+  UC_REG -[hidden]down- UC_LOGIN
+  UC_LOGIN -[hidden]down- UC_ONB
+  UC_ONB -[hidden]down- UC_PROF
+
+  UC_DASH -[hidden]down- UC_TIP
+  UC_TIP -[hidden]down- UC_CHK
+  UC_CHK -[hidden]down- UC_CRAV
+  UC_CRAV -[hidden]down- UC_BR
+  UC_BR -[hidden]down- UC_AI
+
+  UC_PROG -[hidden]down- UC_STAT
+  UC_STAT -[hidden]down- UC_JOUR
+  UC_JOUR -[hidden]down- UC_ACH
+  UC_ACH -[hidden]down- UC_COMM
+
+  UC_REG -[hidden]right- UC_DASH
+  UC_DASH -[hidden]right- UC_PROG
+
+  UC_DASH .> UC_TIP : <<include>>
+  UC_DASH .> UC_CHK : <<include>>
+  UC_CRAV .> UC_DASH : <<extend>>
+  UC_AI .> UC_CRAV : <<extend>>
+}
+
+Guest --> UC_REG
+Guest --> UC_LOGIN
+
+User --> UC_ONB
+User --> UC_PROF
+User --> UC_DASH
+User --> UC_CHK
+User --> UC_CRAV
+User --> UC_BR
+User --> UC_AI
+User --> UC_PROG
+User --> UC_STAT
+User --> UC_JOUR
+User --> UC_ACH
+User --> UC_COMM
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml seq-ai-chat
+title Рисунок 9 - Чат с ИИ-помощником
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 12
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #C4A000
+}
+
+actor "Пользователь" as User
+participant "Клиент (React PWA)" as Client
+participant "Сервер (Express API)" as Server
+database "PostgreSQL" as DB
+participant "GigaChat (API)" as AI
+
+note over User, DB #FFFACD
+  Предусловие: пользователь авторизован,
+  открыт экран чата
+end note
+
+User -> Client : текст или быстрая фраза
+Client -> Server : POST /api/ai/chat + Bearer
+activate Server
+
+Server -> DB : диалог и история сообщений
+DB --> Server : conversation
+
+Server -> DB : профиль и прогресс (контекст)
+DB --> Server : контекст
+
+Server -> DB : сохранить сообщение user
+Server --> Client : SSE-поток (text/event-stream)
+
+loop потоковая генерация
+  Server -> AI : chat completion stream
+  AI --> Server : фрагмент ответа
+  Server --> Client : chunk content
+  Client --> User : показать текст по мере поступления
+end
+
+Server -> DB : сохранить ответ assistant
+deactivate Server
+
+Client --> User : диалог обновлен
+
+@enduml

@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kvitifai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kvitifai}
+      POSTGRES_DB: ${POSTGRES_DB:-kvitifai}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kvitifai} -d ${POSTGRES_DB:-kvitifai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kvitifai}:${POSTGRES_PASSWORD:-kvitifai}@db:5432/${POSTGRES_DB:-kvitifai}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS}
+      GIGACHAT_ALLOW_INSECURE: ${GIGACHAT_ALLOW_INSECURE:-true}
+      CLIENT_URL: ${CLIENT_URL}
+      CLIENT_URLS: ${CLIENT_URLS:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+    expose:
+      - "3001"
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+
+volumes:
+  db-data:

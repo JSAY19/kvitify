@@ -1,0 +1,44 @@
+@startuml seq-onboarding
+title Рисунок 7 - Онбординг (профиль курения)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 12
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #C4A000
+}
+
+actor "Пользователь" as User
+participant "Клиент (React PWA)" as Client
+participant "Сервер (Express API)" as Server
+database "PostgreSQL" as DB
+
+note over User, DB #FFFACD
+  Предусловие: пользователь авторизован,
+  профиль курения отсутствует
+end note
+
+User -> Client : дата отказа, привычки, мотивация
+Client -> Server : POST /api/user/onboarding + Bearer
+activate Server
+
+Server -> Server : requireAuth, валидация Zod
+Server -> DB : проверка SmokingProfile
+DB --> Server : записи нет
+
+alt профиль уже есть
+  Server --> Client : 409 Conflict
+  Client --> User : сообщение об ошибке
+else создание профиля
+  Server -> DB : INSERT smoking_profile
+  DB --> Server : profile
+  Server --> Client : 201 profile JSON
+  Client -> Client : обновить user.profile
+  Client --> User : переход на дашборд
+end
+
+deactivate Server
+
+@enduml

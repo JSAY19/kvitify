@@ -1,0 +1,35 @@
+@startuml state-session
+title Рисунок 10 - Диаграмма состояний сессии пользователя
+
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam defaultFontSize 12
+
+skinparam state {
+  BackgroundColor #F8FAFC
+  BorderColor #475569
+  FontColor #1E293B
+}
+
+state "Гость" as Guest
+state "Неавторизованный" as Unauth
+state "Онбординг" as Onboard
+state "Пользователь (приложение)" as AppUser
+
+[*] --> Guest
+
+Guest --> Unauth : login или register
+
+Unauth --> Guest : смена страницы
+
+Unauth --> Onboard : JWT без профиля
+
+Unauth --> AppUser : JWT с профилем
+
+Onboard --> AppUser : профиль создан
+
+AppUser --> Unauth : logout или 401
+
+Onboard --> Unauth : logout или 401
+
+@enduml

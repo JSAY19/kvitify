@@ -1,0 +1,141 @@
+@startuml database-erd
+title Рисунок 11 - ER-диаграмма базы данных
+
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+hide circle
+
+entity users {
+  * id : uuid <<PK>>
+  --
+  email : string <<unique>>
+  password_hash : string
+  name : string
+  points : int
+  push_subscription : string
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity smoking_profiles {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK, unique>>
+  quit_date : datetime
+  cigarettes_per_day : int
+  price_per_pack : float
+  cigarettes_per_pack : int
+  smoking_years : int
+  motivation : string
+}
+
+entity progress_logs {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  date : datetime
+  type : enum
+  craving_level : int
+  mood : int
+  notes : string
+  cigarettes_smoked : int
+}
+
+entity ai_conversations {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  title : string
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity ai_messages {
+  * id : uuid <<PK>>
+  --
+  * conversation_id : uuid <<FK>>
+  role : string
+  content : string
+  created_at : datetime
+}
+
+entity journal_entries {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  title : string
+  content : string
+  mood : int
+  created_at : datetime
+}
+
+entity achievements {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  type : string
+  unlocked_at : datetime
+}
+
+entity points_ledger {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  delta : int
+  reason : string
+  created_at : datetime
+}
+
+entity community_posts {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  content : string
+  likes : int
+  created_at : datetime
+}
+
+entity post_reactions {
+  * id : uuid <<PK>>
+  --
+  * post_id : uuid <<FK>>
+  * user_id : uuid <<FK>>
+  emoji : string
+  created_at : datetime
+}
+
+entity post_comments {
+  * id : uuid <<PK>>
+  --
+  * post_id : uuid <<FK>>
+  * user_id : uuid <<FK>>
+  content : string
+  created_at : datetime
+}
+
+entity daily_health_reports {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  date : date
+  content : string
+  stats : json
+  created_at : datetime
+}
+
+users ||--o| smoking_profiles : профиль
+users ||--o{ progress_logs : прогресс
+users ||--o{ ai_conversations : диалоги
+ai_conversations ||--o{ ai_messages : сообщения
+users ||--o{ journal_entries : дневник
+users ||--o{ achievements : достижения
+users ||--o{ points_ledger : баллы
+users ||--o{ community_posts : публикации
+community_posts ||--o{ post_reactions : реакции
+community_posts ||--o{ post_comments : комментарии
+users ||--o{ post_reactions
+users ||--o{ post_comments
+users ||--o{ daily_health_reports : здоровье
+
+@enduml

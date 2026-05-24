@@ -1,0 +1,39 @@
+@startuml architecture
+title Рисунок 10 - Клиент-серверная архитектура
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 11
+
+rectangle "Уровень представления" #E0F2FE {
+
+  component [React SPA\nTypeScript + Vite] as SPA
+  component [PWA Service Worker] as PWA
+}
+
+rectangle "Уровень приложения" #DCFCE7 {
+
+  component [Express REST API] as API
+  component [JWT, Zod, rate limit] as SEC
+  component [Сервисы: auth, progress,\nAI, tips, community] as SVC
+}
+
+rectangle "Уровень данных" #FFE4E6 {
+
+  database PostgreSQL as DB
+  component users
+  component smoking_profiles
+  component progress_logs
+  component ai_messages
+  component journal_entries
+  component achievements
+  component community_posts
+}
+
+cloud GigaChat as GIGA
+
+SPA -down-> API : HTTPS\nJSON Bearer JWT
+API -down-> DB : Prisma ORM
+SVC -right-> GIGA : HTTPS
+
+@enduml

@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  points       Int      @default(0)
+  pushSubscription String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile         SmokingProfile?
+  progressLogs    ProgressLog[]
+  aiInteractions  AIInteraction[]
+  aiConversations AIConversation[]
+  achievements    Achievement[]
+  journalEntries  JournalEntry[]
+  communityPosts  CommunityPost[]
+  postReactions   PostReaction[]
+  postComments    PostComment[]
+  pointsLedger    PointsLedger[]
+  healthReports   DailyHealthReport[]
+}
+
+model SmokingProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quitDate          DateTime
+  cigarettesPerDay  Int
+  pricePerPack      Float
+  cigarettesPerPack Int      @default(20)
+  smokingYears      Int?
+  motivation        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model ProgressLog {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date             DateTime       @default(now())
+  type             LogType
+  cravingLevel     Int?
+  mood             Int?
+  notes            String?
+  cigarettesSmoked Int            @default(0)
+  usedTobacco      Boolean        @default(false)
+  substanceType    SubstanceType?
+
+  @@index([userId, date])
+}
+
+model AIInteraction {
+  id          String            @id @default(uuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMessage String
+  aiResponse  String
+  type        AIInteractionType
+  createdAt   DateTime          @default(now())
+
+  @@index([userId, createdAt])
+}
+
+enum LogType {
+  DAILY_CHECKIN
+  CRAVING
+  RELAPSE
+  MILESTONE
+}
+
+enum SubstanceType {
+  CIGARETTE
+  VAPE
+}
+
+enum AIInteractionType {
+  CRAVING_SUPPORT
+  RECOMMENDATION
+  MOTIVATION
+  CHAT
+}
+
+model AIConversation {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String      @default("Новый чат")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  messages  AIMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Achievement {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, type])
+  @@index([userId])
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  mood      Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model CommunityPost {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  reactions PostReaction[]
+  comments  PostComment[]
+
+  @@index([createdAt])
+}
+
+model PostReaction {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+}
+
+model PostComment {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+}
+
+model PointsLedger {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta     Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model DailyHealthReport {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  content   String
+  stats     Json
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}

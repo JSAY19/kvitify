@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1.6
+
+FROM node:20-bookworm-slim AS base
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# ---- deps ----
+FROM base AS deps
+COPY package.json package-lock.json* ./
+COPY tsconfig.base.json ./
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/server/package.json packages/server/package.json
+COPY packages/client/package.json packages/client/package.json
+RUN npm install --workspaces --include-workspace-root --no-audit --no-fund
+
+# ---- build ----
+FROM deps AS build
+COPY packages/shared packages/shared
+COPY packages/server packages/server
+RUN npx prisma generate --schema=packages/server/prisma/schema.prisma
+RUN npm run build -w packages/shared
+RUN npm run build -w packages/server
+
+# ---- runtime ----
+FROM base AS runtime
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3001
+
+COPY --from=build /app/package.json /app/package-lock.json* ./
+COPY --from=build /app/packages/server/package.json packages/server/package.json
+COPY --from=build /app/packages/shared/package.json packages/shared/package.json
+COPY --from=build /app/packages/client/package.json packages/client/package.json
+
+RUN npm install --omit=dev --workspaces --include-workspace-root --no-audit --no-fund
+
+COPY --from=build /app/packages/shared/src packages/shared/src
+COPY --from=build /app/packages/server/dist packages/server/dist
+COPY --from=build /app/packages/server/prisma packages/server/prisma
+COPY --from=build /app/node_modules/.prisma node_modules/.prisma
+COPY --from=build /app/node_modules/@prisma node_modules/@prisma
+
+EXPOSE 3001
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:3001/healthz || exit 1
+
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=packages/server/prisma/schema.prisma && node packages/server/dist/index.js"]

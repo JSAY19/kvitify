@@ -1,0 +1,62 @@
+@startuml kvitifai-use-cases-simple
+' Упрощённая диаграмма (один столбец прецедентов) — для вставки в Word, если полная не помещается
+
+title Диаграмма прецедентов — PWA «КвитиФай» (обобщённая)
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam Padding 20
+skinparam nodesep 12
+skinparam ranksep 16
+skinparam defaultFontSize 11
+
+skinparam actor { BackgroundColor #DBEAFE; BorderColor #2563EB }
+skinparam usecase { BackgroundColor #F8FAFC; BorderColor #64748B }
+skinparam rectangle { BorderColor #475569; BackgroundColor #FFFFFF }
+
+left to right direction
+
+actor "Гость" as Guest
+actor "Пользователь" as User
+Guest -[hidden]down- User
+
+rectangle "«КвитиФай»" {
+
+  (Регистрация) as UC_REG
+  (Вход в аккаунт) as UC_LOGIN
+  (Онбординг) as UC_ONB
+  (Дашборд и совет дня) as UC_DASH
+  (Учёт прогресса) as UC_PROG
+  (Поддержка при тяге) as UC_CRAV
+  (Чат с ИИ) as UC_AI
+  (Аналитика) as UC_STAT
+  (Дневник и достижения) as UC_EXTRA
+  (Сообщество) as UC_COMM
+  (Профиль и push) as UC_PROF
+
+  UC_REG -[hidden]down- UC_LOGIN
+  UC_LOGIN -[hidden]down- UC_ONB
+  UC_ONB -[hidden]down- UC_DASH
+  UC_DASH -[hidden]down- UC_PROG
+  UC_PROG -[hidden]down- UC_CRAV
+  UC_CRAV -[hidden]down- UC_AI
+  UC_AI -[hidden]down- UC_STAT
+  UC_STAT -[hidden]down- UC_EXTRA
+  UC_EXTRA -[hidden]down- UC_COMM
+  UC_COMM -[hidden]down- UC_PROF
+}
+
+Guest --> UC_REG
+Guest --> UC_LOGIN
+
+User --> UC_ONB
+User --> UC_DASH
+User --> UC_PROG
+User --> UC_CRAV
+User --> UC_AI
+User --> UC_STAT
+User --> UC_EXTRA
+User --> UC_COMM
+User --> UC_PROF
+
+@enduml

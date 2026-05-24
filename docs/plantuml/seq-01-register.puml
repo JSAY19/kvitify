@@ -1,0 +1,52 @@
+@startuml seq-register
+title Рисунок 5 - Регистрация
+
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #C4A000
+}
+
+actor "Пользователь (гость)" as User
+participant "Клиент (React PWA)" as Client
+participant "Сервер (Express API)" as Server
+database "PostgreSQL" as DB
+
+note over User, DB #FFFACD
+  Прецедент: Регистрация
+  Предусловие: гость, страница регистрации
+end note
+
+User -> Client : имя, email, пароль
+Client -> Server : POST /api/auth/register
+activate Server
+
+Server -> Server : валидация Zod
+Server -> DB : проверка email
+DB --> Server : свободен / занят
+
+alt email занят
+  Server --> Client : 409 Conflict
+  Client --> User : ошибка: email занят
+else email свободен
+  Server -> Server : bcrypt, хэш пароля
+  Server -> DB : INSERT user
+  DB --> Server : OK
+  Server -> Server : access JWT + refresh JWT
+  Server --> Client : 201 + accessToken + Set-Cookie
+  Client -> Client : сохранить токен и user
+  Client --> User : переход /onboarding
+end
+
+deactivate Server
+
+note over User, DB #FFFACD
+  Постусловие: учетная запись создана,
+  пользователь на онбординге
+end note
+
+@enduml

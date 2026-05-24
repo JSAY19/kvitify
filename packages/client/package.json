@@ -1,0 +1,41 @@
+{
+  "name": "@kvitifai/client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@kvitifai/shared": "*",
+    "axios": "^1.7.9",
+    "dompurify": "^3.2.4",
+    "echarts": "^6.1.0",
+    "echarts-for-react": "^3.0.6",
+    "framer-motion": "^12.4.7",
+    "idb-keyval": "^6.2.1",
+    "lucide-react": "^0.474.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.6.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.2.0",
+    "recharts": "^2.15.1",
+    "rehype-sanitize": "^6.0.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.2.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

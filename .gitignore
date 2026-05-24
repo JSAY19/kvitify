@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+packages/client/dev-dist/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+.env.production
+packages/server/.vapid-keys.json
+
+# Logs and OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE and local tooling
+.vscode/
+!.vscode/settings.json
+.idea/
+.cursor/
+
+# Test coverage
+coverage/
+
+# Database local files
+packages/server/prisma/*.db
+
+# Coursework / local drafts (not part of the app)
+docx_text/
+
+# Design sources (icons are in packages/client/public)
+source-icon.png
+favicon.ico
+
+# Temp
+*.tmp
+*.swp
